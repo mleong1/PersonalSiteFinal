@@ -34,6 +34,37 @@ jumpImg.src = 'Assets/pixelMeFolderRight/pixelMeJump.png';
 
 var picArray = [idleImg, moveImg1, moveImg2, moveImg3, moveImg4, moveImg5, moveImg6, moveImg7];
 
+//loading the left facing movement pictures
+var idleImgLeft = new Image();
+idleImgLeft.src = 'Assets/pixelMeFolderLeft/pixelMertLeft.png';
+
+var moveLeftImg1 = new Image();
+moveLeftImg1.src = 'Assets/pixelMeFolderLeft/pixelMe1Left.png';
+
+var moveLeftImg2 = new Image();
+moveLeftImg2.src = 'Assets/pixelMeFolderLeft/pixelMe2Left.png';
+
+var moveLeftImg3 = new Image();
+moveLeftImg3.src = 'Assets/pixelMeFolderLeft/pixelMe3Left.png';
+
+var moveLeftImg4 = new Image();
+moveLeftImg4.src = 'Assets/pixelMeFolderLeft/pixelMe4Left.png';
+
+var moveLeftImg5 = new Image();
+moveLeftImg5.src = 'Assets/pixelMeFolderLeft/pixelMe5Left.png';
+
+var moveLeftImg6 = new Image();
+moveLeftImg6.src = 'Assets/pixelMeFolderLeft/pixelMe6Left.png';
+
+var moveLeftImg7 = new Image();
+moveLeftImg7.src = 'Assets/pixelMeFolderLeft/pixelMe7Left.png';
+
+var jumpLeftImg = new Image();
+jumpLeftImg.src = 'Assets/pixelMeFolderLeft/pixelMeJumpLeft.png';
+
+var picLeftArray = [idleImgLeft, moveLeftImg1, moveLeftImg2, moveLeftImg3, moveLeftImg4, moveLeftImg5,
+    moveLeftImg6, moveLeftImg7];
+
 
 
 function fitToParentContainer(canvas) {
@@ -52,7 +83,7 @@ function draw() {
 
 //There should be a start game function to put everything in their starting places
 //There should be a reset to be called when the canvas isn't in view
-//Classes player, platforms (extend platforms so that they can have textures and not just words), items
+//Classes player, platforms (extend platforms so that they can have textures and not just words), items, gameObj, and controller
 
 //*****Classes*****//
 class gameObject{
@@ -97,23 +128,51 @@ class gameObject{
 }
 
 class player extends gameObject{
-    constructor(x, y, w, h, leftArr, rightArr) {
+    constructor(x, y, w, h, rightArr, leftArr) {
         super(x, y, w, h);
-        this.leftArr = leftArr;
         this.rightArr = rightArr;
+        this.leftArr = leftArr;
         this.xVel = 0;
         this.yVel = 0;
+        this.facingRight = true;
     }
 
+    get xVelocity(){
+        return this.xVel;
+    }
+
+    set xVelocity(xVel){
+        this.xVel = xVel;
+    }
+
+    get yVelocity(){
+        return this.yVel;
+    }
+
+    set yVelocity(yVel){
+        this.yVel = yVel;
+    }
+
+
     update(){
+        if(this.xVel > 0){
+            this.facingRight = true;
+        } else {
+            this.facingRight = false;
+        }
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(this.leftArr[0], this.x, this.y, this.w, this.h);
+        console.log(this.xVel);
+        if(this.facingRight) {
+            ctx.drawImage(this.rightArr[0], this.x, this.y, this.w, this.h);
+        } else {
+            ctx.drawImage(this.leftArr[0], this.x, this.y, this.w, this.h);
+        }
     }
 }
 
 
 var matt = new player(canvas.width - canvas.width * .20 + xMove, canvas.height - canvas.height * .30,
-    canvas.width * .18, canvas.height *.3, picArray, picArray);
+    canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 
 function animate(){
     requestAnimationFrame(animate);
@@ -140,6 +199,7 @@ document.querySelector('body').onkeydown = function (e) {
     //right direction
     if (e.keyCode == 39) {
         xMove += 15;
+        matt.xVelocity += 10
         console.log("heard");
     } else if(e.keyCode == 37){
         xMove -= 15;
