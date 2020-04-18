@@ -1,0 +1,24 @@
+html, body{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+h1{
+    display: block;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+}
+
+
+.container-fluid{
+    border: red dotted;
+    height: 100%;
+}
+
+canvas{
+    border: purple solid;
+}
