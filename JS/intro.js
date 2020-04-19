@@ -135,6 +135,8 @@ class player extends gameObject{
         this.xVel = 0;
         this.yVel = 0;
         this.facingRight = true;
+        this.isMoving = false;
+        this.currentFrame = 0;
     }
 
     get xVelocity(){
@@ -155,17 +157,47 @@ class player extends gameObject{
 
 
     update(){
+        //frames are doubled here so the running animation is slower
+        this.xVel *= 0.9;
+
+        this.checkIfStopped();
+        
+        if(this.currentFrame > 13){
+            this.currentFrame = 1;
+        }
+
+        if(this.isMoving){
+            this.currentFrame ++;
+        } else {
+            this.currentFrame = 0;
+        }
+
         if(this.xVel > 0){
             this.facingRight = true;
-        } else {
+            this.isMoving = true;
+        } else if (this.xVel < 0) {
             this.facingRight = false;
+            this.isMoving = true;
+        } else {
+            this.isMoving = false;
         }
+
         ctx.imageSmoothingEnabled = false;
         console.log(this.xVel);
         if(this.facingRight) {
-            ctx.drawImage(this.rightArr[0], this.x, this.y, this.w, this.h);
+            ctx.drawImage(this.rightArr[Math.floor(this.currentFrame/2)], this.x, this.y, this.w, this.h);
         } else {
-            ctx.drawImage(this.leftArr[0], this.x, this.y, this.w, this.h);
+            ctx.drawImage(this.leftArr[Math.floor(this.currentFrame/2)], this.x, this.y, this.w, this.h);
+        }
+    }
+
+    //Function to check to see if character's xVelocity has been multiplied by 0.9 enough so that its basically 0.
+    checkIfStopped(){
+        if(this.xVel > 0 && this.xVel < 1){
+            this.xVel = 0;
+        }
+        if(this.xVel < 0 && this.xVel > -1){
+            this.xVel = 0;
         }
     }
 }
@@ -197,11 +229,12 @@ animate();
 document.querySelector('body').onkeydown = function (e) {
 
     //right direction
-    if (e.keyCode == 39) {
+    if (e.keyCode == 68) {
         xMove += 15;
-        matt.xVelocity += 10
+        matt.xVelocity += 10;
         console.log("heard");
-    } else if(e.keyCode == 37){
+    } else if(e.keyCode == 65){
         xMove -= 15;
+        matt.xVelocity -= 10;
     }
 }
