@@ -1,8 +1,9 @@
 var canvas = document.getElementById("intro");
 //ctx allows for the drawing of 2d elements on the canvas
 var ctx = canvas.getContext("2d");
-let xMove = 0;
-let yMove = 0;
+fitToParentContainer(canvas);
+let oldWidth = canvas.width;
+let oldHeight = canvas.height;
 
 <!--Loading sprites-->
 var idleImg = new Image();
@@ -72,6 +73,16 @@ function fitToParentContainer(canvas) {
     canvas.style.height = '100%';
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
+}
+
+function updateOldCanvas(){
+    if(canvas.width != oldWidth){
+        oldWidth = canvas.width;
+    }
+
+    if(canvas.height != oldHeight){
+        oldHeight = canvas.height;
+    }
 }
 
 function draw() {
@@ -158,7 +169,10 @@ class player extends gameObject{
 
     update(){
         //frames are doubled here so the running animation is slower
-        this.xVel *= 0.9;
+        this.resizeSprite();
+
+        this.x += this.xVel;
+        this.xVel *= 0.8;
 
         this.checkIfStopped();
         
@@ -200,11 +214,21 @@ class player extends gameObject{
             this.xVel = 0;
         }
     }
+
+    //Function to resize sprite to canvas browser since the canvas resizes based on parent
+    resizeSprite(){
+        //proportionate x and y positions based on canvas resizing
+        this.x = this.x * canvas.width/oldWidth;
+        this.y = this.y * canvas.height/oldHeight;
+        this.h = canvas.height *.3;
+        this.w = canvas.width * .18;
+    }
 }
 
 
-var matt = new player(canvas.width - canvas.width * .20 + xMove, canvas.height - canvas.height * .30,
+var matt = new player(canvas.width - canvas.width * .95, canvas.height - canvas.height * .30,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
+
 
 function animate(){
     requestAnimationFrame(animate);
@@ -212,29 +236,30 @@ function animate(){
     fitToParentContainer(canvas);
     draw();
     //Todo remove magic numbers
-    matt.xCor = canvas.width - canvas.width * .20 + xMove;
+    /*matt.xCor = canvas.width - canvas.width * .20 + xMove;
     matt.yCor = canvas.height - canvas.height * .30;
     matt.height = canvas.height *.3;
-    matt.weight = canvas.width * .18;
+    matt.weight = canvas.width * .18;*/
     matt.update();
     //console.log(matt.x);
-
+    updateOldCanvas();
 }
 
 animate();
 
 
 
-
+//Need to move this controller out into its own class
+//You can only go one direction at a time it seems
 document.querySelector('body').onkeydown = function (e) {
 
     //right direction
     if (e.keyCode == 68) {
-        xMove += 15;
+        //xMove += 15;
         matt.xVelocity += 10;
         console.log("heard");
     } else if(e.keyCode == 65){
-        xMove -= 15;
+        //xMove -= 15;
         matt.xVelocity -= 10;
     }
 }
