@@ -7,6 +7,8 @@ fitToParentContainer(canvas);
 let oldWidth = canvas.width;
 let oldHeight = canvas.height;
 
+//todo develop a ratio so that pixel art isn't scrunched
+
 
 <!--Loading sprites-->
 var idleImg = new Image();
@@ -187,7 +189,9 @@ class player extends gameObject{
         this.resizeSprite();
 
         this.x += this.xVel;
+        this.y += this.yVel + 1.5;
         this.xVel *= 0.8;
+        this.yVel *= 0.5;
 
         this.checkIfStopped();
 
@@ -244,11 +248,16 @@ function animate(){
     draw();
 
     //this is probably not where this loop should go, probably in the board class down the line
+    //controls scrolling so you don't go out of bounds of the canvas
     if(matt.x < -matt.w){
         console.log("This is Matt's x: " + matt.x);
         matt.x = canvas.width;
     } else if (matt.x > canvas.width){
         matt.x = -matt.w;
+    }
+
+    if(matt.y > canvas.height - matt.h){
+        matt.y = canvas.height - matt.h;
     }
 
     matt.update();
@@ -272,5 +281,7 @@ document.querySelector('body').onkeydown = function (e) {
     } else if(e.keyCode == 65){
         //xMove -= 15;
         matt.xVelocity -= 10;
+    } else if(e.keyCode == 87){
+        matt.yVelocity -= 20;
     }
 }
