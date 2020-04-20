@@ -1,9 +1,12 @@
+//Ideally all the canvas and ground stuff would go in a class for the game board
 var canvas = document.getElementById("intro");
 //ctx allows for the drawing of 2d elements on the canvas
 var ctx = canvas.getContext("2d");
+let ground = canvas.height - canvas.height * .30;
 fitToParentContainer(canvas);
 let oldWidth = canvas.width;
 let oldHeight = canvas.height;
+
 
 <!--Loading sprites-->
 var idleImg = new Image();
@@ -73,6 +76,7 @@ function fitToParentContainer(canvas) {
     canvas.style.height = '100%';
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
+    ground = canvas.height - canvas.height * .30;
 }
 
 function updateOldCanvas(){
@@ -136,6 +140,15 @@ class gameObject{
     set height(h){
         this.h = h;
     }
+
+    //Function to resize sprite to canvas browser since the canvas resizes based on parent
+    resizeSprite(){
+        //proportionate x and y positions based on canvas resizing
+        this.x = this.x * canvas.width/oldWidth;
+        this.y = this.y * canvas.height/oldHeight;
+        this.h = canvas.height *.3;
+        this.w = canvas.width * .18;
+    }
 }
 
 class player extends gameObject{
@@ -169,13 +182,15 @@ class player extends gameObject{
 
     update(){
         //frames are doubled here so the running animation is slower
+
+        //Resize sprite here works because this update is called before updateOldCanvas!
         this.resizeSprite();
 
         this.x += this.xVel;
         this.xVel *= 0.8;
 
         this.checkIfStopped();
-        
+
         if(this.currentFrame > 13){
             this.currentFrame = 1;
         }
@@ -215,18 +230,10 @@ class player extends gameObject{
         }
     }
 
-    //Function to resize sprite to canvas browser since the canvas resizes based on parent
-    resizeSprite(){
-        //proportionate x and y positions based on canvas resizing
-        this.x = this.x * canvas.width/oldWidth;
-        this.y = this.y * canvas.height/oldHeight;
-        this.h = canvas.height *.3;
-        this.w = canvas.width * .18;
-    }
 }
 
 
-var matt = new player(canvas.width - canvas.width * .95, canvas.height - canvas.height * .30,
+var matt = new player(canvas.width - canvas.width * .95, ground,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 
 
@@ -235,11 +242,15 @@ function animate(){
     //fit to parent container needs to be here to resize the canvas whenever the screen is resized
     fitToParentContainer(canvas);
     draw();
-    //Todo remove magic numbers
-    /*matt.xCor = canvas.width - canvas.width * .20 + xMove;
-    matt.yCor = canvas.height - canvas.height * .30;
-    matt.height = canvas.height *.3;
-    matt.weight = canvas.width * .18;*/
+
+    //this is probably not where this loop should go, probably in the board class down the line
+    if(matt.x < -matt.w){
+        console.log("This is Matt's x: " + matt.x);
+        matt.x = canvas.width;
+    } else if (matt.x > canvas.width){
+        matt.x = -matt.w;
+    }
+
     matt.update();
     //console.log(matt.x);
     updateOldCanvas();
