@@ -98,6 +98,14 @@ function draw() {
     ctx.fillText("Matthew Y Leong", canvas.width / 2, canvas.height / 2);
 }
 
+function logInformation(){
+    console.log("This is the canvas height: " + canvas.height);
+    console.log("This is the ground: " + ground);
+    console.log("This is player's x: " + matt.x);
+    console.log("This is player's y: " + matt.y);
+    console.log("Canvas height - matt.h: " + matt.h);
+}
+
 //There should be a start game function to put everything in their starting places
 //There should be a reset to be called when the canvas isn't in view
 //Classes player, platforms (extend platforms so that they can have textures and not just words), items, gameObj, and controller
@@ -144,6 +152,7 @@ class gameObject{
     }
 
     //Function to resize sprite to canvas browser since the canvas resizes based on parent
+    //Resize sprite contantly controls sprites size
     resizeSprite(){
         //proportionate x and y positions based on canvas resizing
         this.x = this.x * canvas.width/oldWidth;
@@ -162,7 +171,10 @@ class player extends gameObject{
         this.yVel = 0;
         this.facingRight = true;
         this.isMoving = false;
+        this.isJumping = false;
         this.currentFrame = 0;
+        this.collisionPointX = this.w/2;
+        this.collisionPointY = this.y + this.h;
     }
 
     get xVelocity(){
@@ -188,10 +200,24 @@ class player extends gameObject{
         //Resize sprite here works because this update is called before updateOldCanvas!
         this.resizeSprite();
 
+        this.collisionPointX = this.w/2;
+        this.collisionPointY = this.y + this.h;
+
         this.x += this.xVel;
-        this.y += this.yVel + 1.5;
+        this.y -= this.yVel;
         this.xVel *= 0.8;
-        this.yVel *= 0.5;
+        this.yVel *= 0.9;
+        console.log("This is the y vel: " + this.yVel);
+        this.yVel -= 2;
+
+        if(this.yVel > 0){
+            this.isJumping = true;
+        } else {
+            this.isJumping = false;
+        }
+
+        //really just need a statement saying don't go past the ground
+
 
         this.checkIfStopped();
 
@@ -224,16 +250,53 @@ class player extends gameObject{
         }
     }
 
-    //Function to check to see if character's xVelocity has been multiplied by 0.9 enough so that its basically 0.
+    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0.
     checkIfStopped(){
         if(this.xVel > 0 && this.xVel < 1){
             this.xVel = 0;
         }
+
         if(this.xVel < 0 && this.xVel > -1){
             this.xVel = 0;
         }
+
+        if(this.yVel > 0 && this.yVel < 1){
+            this.yVel = 0;
+        }
     }
 
+    //function to check collisions with platforms
+    checkCollision(platform){
+        if(this.collisionPointX >= platform.left && this.collisionPointX <= platform.right){
+            if(this.collisionPointY > platform.top){
+                console.log("collision detected")
+            }
+        }
+    }
+
+}
+
+class platform extends gameObject{
+    constructor(x, y, w, h){
+        super(x,y,w,h);
+    }
+
+    get top(){
+        return this.y;
+    }
+
+    get left(){
+        return this.x;
+    }
+
+    get right(){
+        return this.w;
+    }
+
+    update(){
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
 }
 
 
@@ -256,13 +319,21 @@ function animate(){
         matt.x = -matt.w;
     }
 
-    if(matt.y > canvas.height - matt.h){
+    //this loop controls whether you go past the ground
+    //goal is to get rid of this loop since collisions with floors is better
+    if(matt.y > canvas.height - matt.h - 2){
         matt.y = canvas.height - matt.h;
+        //matt.yVel = 0 stops me from jumping because
+
     }
 
+    let theFloor = new platform(0, canvas.height - 2, canvas.width, 2);
+    theFloor.update();
     matt.update();
+    matt.checkCollision(theFloor);
     //console.log(matt.x);
     updateOldCanvas();
+    logInformation();
 }
 
 animate();
@@ -282,6 +353,6 @@ document.querySelector('body').onkeydown = function (e) {
         //xMove -= 15;
         matt.xVelocity -= 10;
     } else if(e.keyCode == 87){
-        matt.yVelocity -= 20;
+        matt.yVelocity += canvas.height * 0.1;
     }
 }
