@@ -104,6 +104,7 @@ function logInformation(){
     //console.log("This is player's x: " + matt.x);
     console.log("This is player's y: " + matt.y);
     console.log("This is the player's feet: " + matt.collisionPointY);
+    console.log("This is collision point x: " + matt.collisionPointX);
     console.log("This is the platform's y: " + theFloor.y);
     //console.log("Canvas height - matt.h: " + matt.h);
     //console.log("This is matt's yVe;: " + matt.yVel);
@@ -201,16 +202,19 @@ class player extends gameObject{
         //frames are doubled here so the running animation is slower
 
         //Resize sprite here works because this update is called before updateOldCanvas!
-        console.log("This is my y vel in the update statement: " + matt.yVel);
-        this.resizeSprite();
 
-        this.collisionPointX = this.w/2;
-        this.collisionPointY = this.y + this.h;
+        //order of these operations really matters
+        //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
+        //after x and y have been updated
+        this.resizeSprite();
 
         this.x += this.xVel;
         this.y -= this.yVel;
         this.xVel *= 0.8;
         this.yVel *= 0.9;
+
+        this.collisionPointX = this.x + this.w /2;
+        this.collisionPointY = this.y + this.h;
         console.log("This is the y vel: " + this.yVel);
         this.yVel -= 2;
 
@@ -264,15 +268,12 @@ class player extends gameObject{
             this.xVel = 0;
         }
 
-        if(this.yVel > 0 && this.yVel < 1){
-            this.yVel = 0;
-        }
     }
 
     //function to check collisions with platforms
     checkCollision(platform){
-        if(this.collisionPointX >= platform.left && this.collisionPointX <= platform.right){
-            if(this.collisionPointY >= platform.top){
+        if(this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
+            if (this.collisionPointY >= platform.top) {
                 console.log("collision detected");
                 this.y = platform.y - this.h;
                 this.yVel = 0;
@@ -319,6 +320,7 @@ class platform extends gameObject{
 var matt = new player(canvas.width - canvas.width * .95, ground,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 var theFloor = new platform(0, canvas.height - 2, canvas.width, 2);
+var platform1 = new platform(0, canvas.height - 300, canvas.width/2, 20);
 
 
 function animate(){
@@ -328,6 +330,7 @@ function animate(){
     draw();
 
 
+    platform1.update();
     theFloor.update();
     matt.update();
     //this is probably not where this loop should go, probably in the board class down the line
@@ -339,19 +342,11 @@ function animate(){
         matt.x = -matt.w;
     }
 
-    //this loop controls whether you go past the ground
-    //goal is to get rid of this loop since collisions with floors is better
-    /*if(matt.y >= canvas.height - matt.h - 2){
-        matt.y = canvas.height - matt.h;
-        matt.yVel = 0 //stops me from jumping because
-    }*/
-
     matt.checkCollision(theFloor);
-    /*if(matt.checkCollision(theFloor)){
-        matt.y = theFloor.y - matt.h;
-        matt.yVel = 0;
-    }*/
-    //console.log(matt.x);
+    if(matt.y <= platform1.y){
+        matt.checkCollision(platform1);
+    }
+
     updateOldCanvas();
     logInformation();
 }
@@ -368,7 +363,6 @@ document.querySelector('body').onkeydown = function (e) {
     if (e.keyCode == 68) {
         //xMove += 15;
         matt.xVelocity += 10;
-        console.log("heard");
     } else if(e.keyCode == 65){
         //xMove -= 15;
         matt.xVelocity -= 10;
