@@ -99,11 +99,14 @@ function draw() {
 }
 
 function logInformation(){
-    console.log("This is the canvas height: " + canvas.height);
-    console.log("This is the ground: " + ground);
-    console.log("This is player's x: " + matt.x);
+    //console.log("This is the canvas height: " + canvas.height);
+    //console.log("This is the ground: " + ground);
+    //console.log("This is player's x: " + matt.x);
     console.log("This is player's y: " + matt.y);
-    console.log("Canvas height - matt.h: " + matt.h);
+    console.log("This is the player's feet: " + matt.collisionPointY);
+    console.log("This is the platform's y: " + theFloor.y);
+    //console.log("Canvas height - matt.h: " + matt.h);
+    //console.log("This is matt's yVe;: " + matt.yVel);
 }
 
 //There should be a start game function to put everything in their starting places
@@ -198,6 +201,7 @@ class player extends gameObject{
         //frames are doubled here so the running animation is slower
 
         //Resize sprite here works because this update is called before updateOldCanvas!
+        console.log("This is my y vel in the update statement: " + matt.yVel);
         this.resizeSprite();
 
         this.collisionPointX = this.w/2;
@@ -268,8 +272,10 @@ class player extends gameObject{
     //function to check collisions with platforms
     checkCollision(platform){
         if(this.collisionPointX >= platform.left && this.collisionPointX <= platform.right){
-            if(this.collisionPointY > platform.top){
-                console.log("collision detected")
+            if(this.collisionPointY >= platform.top){
+                console.log("collision detected");
+                this.y = platform.y - this.h;
+                this.yVel = 0;
             }
         }
     }
@@ -293,15 +299,26 @@ class platform extends gameObject{
         return this.w;
     }
 
+    resizeSprite() {
+        //proportionate x and y positions based on canvas resizing
+        this.x = this.x * canvas.width / oldWidth;
+        this.y = this.y * canvas.height / oldHeight;
+        this.w = this.w * canvas.width / oldWidth;
+        this.h = this.h * canvas.height /oldHeight;
+    }
     update(){
+        this.resizeSprite();
         ctx.imageSmoothingEnabled = false;
         ctx.fillRect(this.x, this.y, this.w, this.h);
     }
+
+    //platforms need their own resizing method
 }
 
 
 var matt = new player(canvas.width - canvas.width * .95, ground,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
+var theFloor = new platform(0, canvas.height - 2, canvas.width, 2);
 
 
 function animate(){
@@ -310,6 +327,9 @@ function animate(){
     fitToParentContainer(canvas);
     draw();
 
+
+    theFloor.update();
+    matt.update();
     //this is probably not where this loop should go, probably in the board class down the line
     //controls scrolling so you don't go out of bounds of the canvas
     if(matt.x < -matt.w){
@@ -321,16 +341,16 @@ function animate(){
 
     //this loop controls whether you go past the ground
     //goal is to get rid of this loop since collisions with floors is better
-    if(matt.y > canvas.height - matt.h - 2){
+    /*if(matt.y >= canvas.height - matt.h - 2){
         matt.y = canvas.height - matt.h;
-        //matt.yVel = 0 stops me from jumping because
+        matt.yVel = 0 //stops me from jumping because
+    }*/
 
-    }
-
-    let theFloor = new platform(0, canvas.height - 2, canvas.width, 2);
-    theFloor.update();
-    matt.update();
     matt.checkCollision(theFloor);
+    /*if(matt.checkCollision(theFloor)){
+        matt.y = theFloor.y - matt.h;
+        matt.yVel = 0;
+    }*/
     //console.log(matt.x);
     updateOldCanvas();
     logInformation();
