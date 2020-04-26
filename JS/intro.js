@@ -6,6 +6,7 @@ let ground = canvas.height - canvas.height * .30;
 fitToParentContainer(canvas);
 let oldWidth = canvas.width;
 let oldHeight = canvas.height;
+let outOfBounds = 100;
 
 //todo develop a ratio so that pixel art isn't scrunched
 
@@ -99,12 +100,12 @@ function draw() {
 }
 
 function logInformation(){
-    //console.log("This is the canvas height: " + canvas.height);
+    console.log("This is the canvas height: " + canvas.height);
     //console.log("This is the ground: " + ground);
     //console.log("This is player's x: " + matt.x);
-    console.log("This is player's y: " + matt.y);
+    //console.log("This is player's y: " + matt.y);
     console.log("This is the player's feet: " + matt.collisionPointY);
-    console.log("This is collision point x: " + matt.collisionPointX);
+    //console.log("This is collision point x: " + matt.collisionPointX);
     console.log("This is the platform's y: " + theFloor.y);
     //console.log("Canvas height - matt.h: " + matt.h);
     //console.log("This is matt's yVe;: " + matt.yVel);
@@ -179,6 +180,7 @@ class player extends gameObject{
         this.currentFrame = 0;
         this.collisionPointX = this.w/2;
         this.collisionPointY = this.y + this.h;
+        this.prevCollisionPointY = this.collisionPointY;
     }
 
     get xVelocity(){
@@ -206,6 +208,14 @@ class player extends gameObject{
         //order of these operations really matters
         //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
         //after x and y have been updated
+        if(this.yVel > 0){
+            this.isJumping = true;
+            //prevCollisionPointY is really apex jump height
+            matt.prevCollisionPointY = matt.collisionPointY;
+        } else {
+            this.isJumping = false;
+        }
+
         this.resizeSprite();
 
         this.x += this.xVel;
@@ -216,13 +226,9 @@ class player extends gameObject{
         this.collisionPointX = this.x + this.w /2;
         this.collisionPointY = this.y + this.h;
         console.log("This is the y vel: " + this.yVel);
-        this.yVel -= 2;
+        this.yVel -= 3;
 
-        if(this.yVel > 0){
-            this.isJumping = true;
-        } else {
-            this.isJumping = false;
-        }
+
 
         //really just need a statement saying don't go past the ground
 
@@ -250,7 +256,6 @@ class player extends gameObject{
         }
 
         ctx.imageSmoothingEnabled = false;
-        console.log(this.xVel);
         if(this.facingRight) {
             ctx.drawImage(this.rightArr[Math.floor(this.currentFrame/2)], this.x, this.y, this.w, this.h);
         } else {
@@ -272,16 +277,29 @@ class player extends gameObject{
 
     //function to check collisions with platforms
     checkCollision(platform){
-        if(this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
-            if (this.collisionPointY >= platform.top) {
-                console.log("collision detected");
-                this.y = platform.y - this.h;
-                this.yVel = 0;
+
+        if (this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
+            //console.log("This is the previous y: " + this.prevCollisionPointY);
+            //console.log("This is the current y: " + this.collisionPointY);
+            console.log("This is my current x pos: " + this.collisionPointX);
+            //console.log("This is the top of the plat: " + platform.top);
+            console.log("this is the left of the plat: " + platform.left);
+            console.log("This is the right of the plat: " + platform.right);
+            //possibly need two checks here? if the previous collisionPointY was greater than the platform top too
+            //problem here is as soon as I hit the jump key I'm above the ground and below platform1 so I'll teleport up
+            //if the old position is above the collidable plat and the new one dips below
+            if(this.prevCollisionPointY <= platform.top) {
+                if (this.collisionPointY >= platform.top) {
+                    console.log("collision detected");
+                    this.y = platform.top - this.h;
+                    this.yVel = 0;
+                    this.prevCollisionPointY = platform.top;
+                }
             }
         }
     }
-
 }
+
 
 class platform extends gameObject{
     constructor(x, y, w, h){
@@ -297,7 +315,7 @@ class platform extends gameObject{
     }
 
     get right(){
-        return this.w;
+        return this.x + this.w;
     }
 
     resizeSprite() {
@@ -316,11 +334,12 @@ class platform extends gameObject{
     //platforms need their own resizing method
 }
 
-
-var matt = new player(canvas.width - canvas.width * .95, ground,
+var theFloor = new platform(0 - outOfBounds, canvas.height - 2, canvas.width + outOfBounds, 2);
+var matt = new player(canvas.width - canvas.width * .95, ground - 2,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
-var theFloor = new platform(0, canvas.height - 2, canvas.width, 2);
-var platform1 = new platform(0, canvas.height - 300, canvas.width/2, 20);
+var platform2 = new platform(canvas.width/2 - 200, canvas.height - 200, canvas.width/2, 20);
+var platform1 = new platform(0, canvas.height - 500, canvas.width/2 + 200, 20);
+var platArray = [platform1, platform2, theFloor];
 
 
 function animate(){
@@ -329,9 +348,10 @@ function animate(){
     fitToParentContainer(canvas);
     draw();
 
+    platArray.forEach(function(plat){
+        plat.update();
+    })
 
-    platform1.update();
-    theFloor.update();
     matt.update();
     //this is probably not where this loop should go, probably in the board class down the line
     //controls scrolling so you don't go out of bounds of the canvas
@@ -342,13 +362,15 @@ function animate(){
         matt.x = -matt.w;
     }
 
-    matt.checkCollision(theFloor);
-    if(matt.y <= platform1.y){
-        matt.checkCollision(platform1);
-    }
+    //matt.checkCollision(theFloor);
+    platArray.forEach(function (plat) {
+        matt.checkCollision(plat);
+    })
+
+
 
     updateOldCanvas();
-    logInformation();
+    //logInformation();
 }
 
 animate();
