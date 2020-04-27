@@ -167,7 +167,7 @@ class gameObject{
     }
 }
 
-class player extends gameObject{
+class Player extends gameObject{
     constructor(x, y, w, h, rightArr, leftArr) {
         super(x, y, w, h);
         this.rightArr = rightArr;
@@ -201,41 +201,60 @@ class player extends gameObject{
 
 
     update(){
-        //frames are doubled here so the running animation is slower
-
-        //Resize sprite here works because this update is called before updateOldCanvas!
-
-        //order of these operations really matters
+        //Order of these operations really matters
         //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
         //after x and y have been updated
         if(this.yVel > 0){
             this.isJumping = true;
-            //prevCollisionPointY is really apex jump height
+            //prevCollisionPointY is really y pos + whatever the jump height is set to
             matt.prevCollisionPointY = matt.collisionPointY;
         } else {
             this.isJumping = false;
         }
 
+        //Because the y collision point isn't factored into resize sprite, if you resize the browser the collisionPointY
+        //will go beyond the ground or whatever plat you're on.
         this.resizeSprite();
 
-        this.x += this.xVel;
-        this.y -= this.yVel;
-        this.xVel *= 0.8;
-        this.yVel *= 0.9;
+        this.updateXSpeed();
+        this.updateYHeight();
+        this.updateCollisionPoints();
+        this.checkIfStopped();
+        //7 total walking frames, total number of frames is 20 for 0 - 20. Every 3 updates is represented by a frame in this case
+        this.drawFrame(20);
+    }
 
+    updateXSpeed(){
+        this.x += this.xVel;
+        this.xVel *= 0.8;
+    }
+
+    updateYHeight(){
+        this.y -= this.yVel;
+        this.yVel *= 0.9;
+        //gravity
+        this.yVel -= 3;
+    }
+
+    updateCollisionPoints(){
         this.collisionPointX = this.x + this.w /2;
         this.collisionPointY = this.y + this.h;
-        console.log("This is the y vel: " + this.yVel);
-        this.yVel -= 3;
+    }
 
+    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0.
+    checkIfStopped(){
+        if(this.xVel > 0 && this.xVel < 1){
+            this.xVel = 0;
+        }
 
+        if(this.xVel < 0 && this.xVel > -1){
+            this.xVel = 0;
+        }
 
-        //really just need a statement saying don't go past the ground
+    }
 
-
-        this.checkIfStopped();
-
-        if(this.currentFrame > 13){
+    drawFrame(numWalkingFrames){
+        if(this.currentFrame > numWalkingFrames){
             this.currentFrame = 1;
         }
 
@@ -257,22 +276,10 @@ class player extends gameObject{
 
         ctx.imageSmoothingEnabled = false;
         if(this.facingRight) {
-            ctx.drawImage(this.rightArr[Math.floor(this.currentFrame/2)], this.x, this.y, this.w, this.h);
+            ctx.drawImage(this.rightArr[Math.floor(this.currentFrame/(numWalkingFrames/7))], this.x, this.y, this.w, this.h);
         } else {
-            ctx.drawImage(this.leftArr[Math.floor(this.currentFrame/2)], this.x, this.y, this.w, this.h);
+            ctx.drawImage(this.leftArr[Math.floor(this.currentFrame/(numWalkingFrames/7))], this.x, this.y, this.w, this.h);
         }
-    }
-
-    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0.
-    checkIfStopped(){
-        if(this.xVel > 0 && this.xVel < 1){
-            this.xVel = 0;
-        }
-
-        if(this.xVel < 0 && this.xVel > -1){
-            this.xVel = 0;
-        }
-
     }
 
     //function to check collisions with platforms
@@ -281,10 +288,11 @@ class player extends gameObject{
         if (this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
             //console.log("This is the previous y: " + this.prevCollisionPointY);
             //console.log("This is the current y: " + this.collisionPointY);
-            console.log("This is my current x pos: " + this.collisionPointX);
+            //console.log("This is my current x pos: " + this.collisionPointX);
             //console.log("This is the top of the plat: " + platform.top);
-            console.log("this is the left of the plat: " + platform.left);
-            console.log("This is the right of the plat: " + platform.right);
+            //console.log("this is the left of the plat: " + platform.left);
+            //console.log("This is the right of the plat: " + platform.right);
+
             //possibly need two checks here? if the previous collisionPointY was greater than the platform top too
             //problem here is as soon as I hit the jump key I'm above the ground and below platform1 so I'll teleport up
             //if the old position is above the collidable plat and the new one dips below
@@ -293,6 +301,9 @@ class player extends gameObject{
                     console.log("collision detected");
                     this.y = platform.top - this.h;
                     this.yVel = 0;
+
+                    //little bug, because the collisionPointY is reset here when a collision on a plat occurs, you can left
+                    //right at the edge of a platform and teleport up
                     this.prevCollisionPointY = platform.top;
                 }
             }
@@ -301,20 +312,20 @@ class player extends gameObject{
 }
 
 
-class platform extends gameObject{
-    constructor(x, y, w, h){
-        super(x,y,w,h);
+class platform extends gameObject {
+    constructor(x, y, w, h) {
+        super(x, y, w, h);
     }
 
-    get top(){
+    get top() {
         return this.y;
     }
 
-    get left(){
+    get left() {
         return this.x;
     }
 
-    get right(){
+    get right() {
         return this.x + this.w;
     }
 
@@ -323,21 +334,28 @@ class platform extends gameObject{
         this.x = this.x * canvas.width / oldWidth;
         this.y = this.y * canvas.height / oldHeight;
         this.w = this.w * canvas.width / oldWidth;
-        this.h = this.h * canvas.height /oldHeight;
+        this.h = this.h * canvas.height / oldHeight;
     }
-    update(){
+
+    update() {
         this.resizeSprite();
         ctx.imageSmoothingEnabled = false;
+        //ctx.fillText("A really cool guy.", this.x + canvas.width * 0.11, this.y + this.h * 1.75, this.w);
         ctx.fillRect(this.x, this.y, this.w, this.h);
     }
 
     //platforms need their own resizing method
 }
 
+
+class TextPlatform extends platform{
+
+}
+
 var theFloor = new platform(0 - outOfBounds, canvas.height - 2, canvas.width + outOfBounds, 2);
-var matt = new player(canvas.width - canvas.width * .95, ground - 2,
+var matt = new Player(canvas.width - canvas.width * .95, ground - 2,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
-var platform2 = new platform(canvas.width/2 - 200, canvas.height - 200, canvas.width/2, 20);
+var platform2 = new platform(canvas.width/2 - 200, canvas.height - 200, canvas.width * 0.22, 20);
 var platform1 = new platform(0, canvas.height - 500, canvas.width/2 + 200, 20);
 var platArray = [platform1, platform2, theFloor];
 
@@ -367,8 +385,6 @@ function animate(){
         matt.checkCollision(plat);
     })
 
-
-
     updateOldCanvas();
     //logInformation();
 }
@@ -380,7 +396,6 @@ animate();
 //Need to move this controller out into its own class
 //You can only go one direction at a time it seems
 document.querySelector('body').onkeydown = function (e) {
-
     //right direction
     if (e.keyCode == 68) {
         //xMove += 15;
