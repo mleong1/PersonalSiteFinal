@@ -6,9 +6,13 @@ let ground = canvas.height - canvas.height * .30;
 fitToParentContainer(canvas);
 let oldWidth = canvas.width;
 let oldHeight = canvas.height;
+/*outOfBounds here is just a little buffer that I end up adding to the floor to give 100 pixels to the left and 100 to the
+  right more space.*/
 let outOfBounds = 100;
 
 //todo develop a ratio so that pixel art isn't scrunched
+//todo look into import statements instead of loading each separate JS file
+
 
 
 <!--Loading sprites-->
@@ -116,247 +120,88 @@ function logInformation(){
 //Classes player, platforms (extend platforms so that they can have textures and not just words), items, gameObj, and controller
 
 //*****Classes*****//
-class gameObject{
-    constructor(x, y, w, h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+
+
+class TextPlatform extends Platform{
+}
+
+
+/*
+Controller inputs, need to think of a better way to handle these
+ */
+
+var rightPressed;
+var leftPressed;
+var upPressed;
+
+class Controller{
+    constructor(){
+        //todo need to get these constructor variables to work somehow
+        this.rightPressed = false;
+        this.leftPressed = false;
+        this.upPressed = false;
     }
 
-    get xCor(){
-        return this.x;
+    //I had three instance variables here, one for each input set to false, didn't work
+    keyDownHandler(e){
+        if (e.key == 'd') {
+            //move right
+            rightPressed = true;
+            console.log("right key is pressed!");
+            console.log(this.rightPressed);
+        }
+        if (e.key == 'a'){
+            //move left
+            leftPressed = true;
+        }
+        if(e.key == "w"){
+            //jump
+            upPressed = true;
+        }
     }
 
-    set xCor(xCor){
-        this.x = xCor;
-    }
-
-    get yCor(){
-        return this.y;
-    }
-
-    set yCor(yCor){
-        this.y = yCor;
-    }
-
-    get weight(){
-        return this.w;
-    }
-
-    set weight(w){
-        this.w = w;
-    }
-
-    get height(){
-        return this.h;
-    }
-
-    set height(h){
-        this.h = h;
-    }
-
-    //Function to resize sprite to canvas browser since the canvas resizes based on parent
-    //Resize sprite contantly controls sprites size
-    resizeSprite(){
-        //proportionate x and y positions based on canvas resizing
-        this.x = this.x * canvas.width/oldWidth;
-        this.y = this.y * canvas.height/oldHeight;
-        this.h = canvas.height *.3;
-        this.w = canvas.width * .18;
+    keyUpHandler(e){
+        if (e.keyCode == 68) {
+            //move right
+            console.log("right key is not pressed.");
+            rightPressed = false;
+            console.log(this.rightPressed);
+        }
+        if(e.keyCode == 65){
+            //move left
+            leftPressed = false;
+        }
+        if(e.keyCode == 87){
+            //jump
+            upPressed = false;
+        }
     }
 }
 
-class Player extends gameObject{
-    constructor(x, y, w, h, rightArr, leftArr) {
-        super(x, y, w, h);
-        this.rightArr = rightArr;
-        this.leftArr = leftArr;
-        this.xVel = 0;
-        this.yVel = 0;
-        this.facingRight = true;
-        this.isMoving = false;
-        this.isJumping = false;
-        this.currentFrame = 0;
-        this.collisionPointX = this.w/2;
-        this.collisionPointY = this.y + this.h;
-        this.prevCollisionPointY = this.collisionPointY;
-    }
 
-    get xVelocity(){
-        return this.xVel;
+/*class Game{
+    constructor(player, controller){
+        this.player = player;
+        this.controller = controller;
     }
-
-    set xVelocity(xVel){
-        this.xVel = xVel;
-    }
-
-    get yVelocity(){
-        return this.yVel;
-    }
-
-    set yVelocity(yVel){
-        this.yVel = yVel;
-    }
-
 
     update(){
-        //Order of these operations really matters
-        //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
-        //after x and y have been updated
-        if(this.yVel > 0){
-            this.isJumping = true;
-            //prevCollisionPointY is really y pos + whatever the jump height is set to
-            matt.prevCollisionPointY = matt.collisionPointY;
-        } else {
-            this.isJumping = false;
-        }
-
-        //Because the y collision point isn't factored into resize sprite, if you resize the browser the collisionPointY
-        //will go beyond the ground or whatever plat you're on.
-        this.resizeSprite();
-
-        this.updateXSpeed();
-        this.updateYHeight();
-        this.updateCollisionPoints();
-        this.checkIfStopped();
-        //7 total walking frames, total number of frames is 20 for 0 - 20. Every 3 updates is represented by a frame in this case
-        this.drawFrame(20);
-    }
-
-    updateXSpeed(){
-        this.x += this.xVel;
-        this.xVel *= 0.8;
-    }
-
-    updateYHeight(){
-        this.y -= this.yVel;
-        this.yVel *= 0.9;
-        //gravity
-        this.yVel -= 3;
-    }
-
-    updateCollisionPoints(){
-        this.collisionPointX = this.x + this.w /2;
-        this.collisionPointY = this.y + this.h;
-    }
-
-    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0.
-    checkIfStopped(){
-        if(this.xVel > 0 && this.xVel < 1){
-            this.xVel = 0;
-        }
-
-        if(this.xVel < 0 && this.xVel > -1){
-            this.xVel = 0;
-        }
-
-    }
-
-    drawFrame(numWalkingFrames){
-        if(this.currentFrame > numWalkingFrames){
-            this.currentFrame = 1;
-        }
-
-        if(this.isMoving){
-            this.currentFrame ++;
-        } else {
-            this.currentFrame = 0;
-        }
-
-        if(this.xVel > 0){
-            this.facingRight = true;
-            this.isMoving = true;
-        } else if (this.xVel < 0) {
-            this.facingRight = false;
-            this.isMoving = true;
-        } else {
-            this.isMoving = false;
-        }
-
-        ctx.imageSmoothingEnabled = false;
-        if(this.facingRight) {
-            ctx.drawImage(this.rightArr[Math.floor(this.currentFrame/(numWalkingFrames/7))], this.x, this.y, this.w, this.h);
-        } else {
-            ctx.drawImage(this.leftArr[Math.floor(this.currentFrame/(numWalkingFrames/7))], this.x, this.y, this.w, this.h);
+        console.log("Got here at least");
+        if(controller.rightPressed){
+            console.log("We have an input");
         }
     }
+}*/
 
-    //function to check collisions with platforms
-    checkCollision(platform){
+var controller = new Controller();
+document.addEventListener('keydown', controller.keyDownHandler);
+document.addEventListener('keyup', controller.keyUpHandler);
 
-        if (this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
-            //console.log("This is the previous y: " + this.prevCollisionPointY);
-            //console.log("This is the current y: " + this.collisionPointY);
-            //console.log("This is my current x pos: " + this.collisionPointX);
-            //console.log("This is the top of the plat: " + platform.top);
-            //console.log("this is the left of the plat: " + platform.left);
-            //console.log("This is the right of the plat: " + platform.right);
-
-            //possibly need two checks here? if the previous collisionPointY was greater than the platform top too
-            //problem here is as soon as I hit the jump key I'm above the ground and below platform1 so I'll teleport up
-            //if the old position is above the collidable plat and the new one dips below
-            if(this.prevCollisionPointY <= platform.top) {
-                if (this.collisionPointY >= platform.top) {
-                    console.log("collision detected");
-                    this.y = platform.top - this.h;
-                    this.yVel = 0;
-
-                    //little bug, because the collisionPointY is reset here when a collision on a plat occurs, you can left
-                    //right at the edge of a platform and teleport up
-                    this.prevCollisionPointY = platform.top;
-                }
-            }
-        }
-    }
-}
-
-
-class platform extends gameObject {
-    constructor(x, y, w, h) {
-        super(x, y, w, h);
-    }
-
-    get top() {
-        return this.y;
-    }
-
-    get left() {
-        return this.x;
-    }
-
-    get right() {
-        return this.x + this.w;
-    }
-
-    resizeSprite() {
-        //proportionate x and y positions based on canvas resizing
-        this.x = this.x * canvas.width / oldWidth;
-        this.y = this.y * canvas.height / oldHeight;
-        this.w = this.w * canvas.width / oldWidth;
-        this.h = this.h * canvas.height / oldHeight;
-    }
-
-    update() {
-        this.resizeSprite();
-        ctx.imageSmoothingEnabled = false;
-        //ctx.fillText("A really cool guy.", this.x + canvas.width * 0.11, this.y + this.h * 1.75, this.w);
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-    }
-
-    //platforms need their own resizing method
-}
-
-
-class TextPlatform extends platform{
-
-}
-
-var theFloor = new platform(0 - outOfBounds, canvas.height - 2, canvas.width + outOfBounds, 2);
-var matt = new Player(canvas.width - canvas.width * .95, ground - 2,
+var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + outOfBounds, 2);
+var matt = new Player(canvas.width - canvas.width * .95, ground - 40,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
-var platform2 = new platform(canvas.width/2 - 200, canvas.height - 200, canvas.width * 0.22, 20);
-var platform1 = new platform(0, canvas.height - 500, canvas.width/2 + 200, 20);
+var platform2 = new Platform(canvas.width/2 - 200, canvas.height - 200, canvas.width * 0.22, 20);
+var platform1 = new Platform(0, canvas.height - 500, canvas.width/2 + 200, 20);
 var platArray = [platform1, platform2, theFloor];
 
 
@@ -364,11 +209,24 @@ function animate(){
     requestAnimationFrame(animate);
     //fit to parent container needs to be here to resize the canvas whenever the screen is resized
     fitToParentContainer(canvas);
-    draw();
 
     platArray.forEach(function(plat){
         plat.update();
     })
+
+    console.log("Inside the game loop: " + controller.rightPressed + " " + matt.xVel + " ");
+    //if checks can't be conditional here otherwise you won't be able to run and jump
+    //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
+    if(rightPressed){
+        console.log("Got here");
+        matt.xVelocity += 5;
+    }
+    if(leftPressed){
+        matt.xVelocity -= 5;
+    }
+    if(upPressed){
+        matt.jump(canvas.height * 0.1);
+    }
 
     matt.update();
     //this is probably not where this loop should go, probably in the board class down the line
@@ -395,7 +253,7 @@ animate();
 
 //Need to move this controller out into its own class
 //You can only go one direction at a time it seems
-document.querySelector('body').onkeydown = function (e) {
+/*document.querySelector('body').onkeydown = function (e) {
     //right direction
     if (e.keyCode == 68) {
         //xMove += 15;
@@ -406,4 +264,4 @@ document.querySelector('body').onkeydown = function (e) {
     } else if(e.keyCode == 87){
         matt.yVelocity += canvas.height * 0.1;
     }
-}
+}*/
