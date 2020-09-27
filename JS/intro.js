@@ -8,7 +8,7 @@ let oldWidth = canvas.width;
 let oldHeight = canvas.height;
 /*outOfBounds here is just a little buffer that I end up adding to the floor to give 100 pixels to the left and 100 to the
   right more space.*/
-let outOfBounds = 100;
+let outOfBounds = canvas.width/2;
 
 //todo develop a ratio so that pixel art isn't scrunched
 //todo look into import statements instead of loading each separate JS file
@@ -197,7 +197,7 @@ var controller = new Controller();
 document.addEventListener('keydown', controller.keyDownHandler);
 document.addEventListener('keyup', controller.keyUpHandler);
 
-var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + outOfBounds, 2);
+var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + (outOfBounds * 2), 2);
 var matt = new Player(canvas.width - canvas.width * .95, ground - 40,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 var platform2 = new Platform(canvas.width/2 - 200, canvas.height - 200, canvas.width * 0.22, 20);
@@ -214,7 +214,7 @@ function animate(){
         plat.update();
     })
 
-    console.log("Inside the game loop: " + controller.rightPressed + " " + matt.xVel + " ");
+    //console.log("Inside the game loop: " + controller.rightPressed + " " + matt.xVel + " ");
     //if checks can't be conditional here otherwise you won't be able to run and jump
     //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
     if(rightPressed){
@@ -232,7 +232,6 @@ function animate(){
     //this is probably not where this loop should go, probably in the board class down the line
     //controls scrolling so you don't go out of bounds of the canvas
     if(matt.x < -matt.w){
-        console.log("This is Matt's x: " + matt.x);
         matt.x = canvas.width;
     } else if (matt.x > canvas.width){
         matt.x = -matt.w;

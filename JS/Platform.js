@@ -11,6 +11,8 @@ class Platform extends GameObject {
         return this.x;
     }
 
+    //this doesn't work well when the left is negative
+    //the floor platform seems to be the only thing that dips into negative space so it might be OK to just add more to the right to compensate
     get right() {
         return this.x + this.w;
     }

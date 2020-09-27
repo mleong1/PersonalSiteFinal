@@ -36,12 +36,26 @@ class Player extends GameObject{
         //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
         //after x and y have been updated
 
+        console.log("Current collision point x: " + this.collisionPointX + " Previous collision point y: " + this.prevCollisionPointY);
+
         //todo this doesn't stop double jumps, yVel goes positive during a jump yes, but on the way down its negative in air: FIXED!
+        /*really you want to update the previous collision point y if you're falling or jumping. If you're falling and you don't update
+          prev collision point y, you will satisfy the conditions of the collision detection if you fall off a platform but move your x
+          pos inside of it.
+         */
+
+        //prevCollisionPointY has to go here first
         if(this.yVel > 0){
-            this.isJumping = true;
+            matt.prevCollisionPointY = matt.collisionPointY;
             //prevCollisionPointY is really y pos + whatever the jump height is set to
+
+        }
+
+        if(this.yVel < 0){
             matt.prevCollisionPointY = matt.collisionPointY;
         }
+
+
 
         if(this.yVel == 0){
             this.isJumping = false;
@@ -121,6 +135,7 @@ class Player extends GameObject{
     jump(height){
         if(!this.isJumping){
             this.yVelocity += height;
+            this.isJumping = true;
         }
     }
 
@@ -128,12 +143,15 @@ class Player extends GameObject{
     checkCollision(platform){
 
         if (this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
-            //console.log("This is the previous y: " + this.prevCollisionPointY);
-            //console.log("This is the current y: " + this.collisionPointY);
-            //console.log("This is my current x pos: " + this.collisionPointX);
-            //console.log("This is the top of the plat: " + platform.top);
-            //console.log("this is the left of the plat: " + platform.left);
-            //console.log("This is the right of the plat: " + platform.right);
+            //console.log("Passed collision check 1");
+            /*
+            console.log("This is the previous y: " + this.prevCollisionPointY);
+            console.log("This is the current y: " + this.collisionPointY);
+            console.log("This is my current x pos: " + this.collisionPointX);
+
+            console.log("This is the top of the plat: " + platform.top);
+            console.log("this is the left of the plat: " + platform.left);
+            console.log("This is the right of the plat: " + platform.right);*/
 
             //possibly need two checks here? if the previous collisionPointY was greater than the platform top too
             //problem here is as soon as I hit the jump key I'm above the ground and below platform1 so I'll teleport up
@@ -146,7 +164,7 @@ class Player extends GameObject{
 
                     //little bug, because the collisionPointY is reset here when a collision on a plat occurs, you can left
                     //right at the edge of a platform and teleport up
-                    this.prevCollisionPointY = platform.top;
+
                 }
             }
         }
