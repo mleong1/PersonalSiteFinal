@@ -36,38 +36,22 @@ class Player extends GameObject{
         //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
         //after x and y have been updated
 
-        console.log("Current collision point x: " + this.collisionPointX + " Previous collision point y: " + this.prevCollisionPointY);
-
         //todo this doesn't stop double jumps, yVel goes positive during a jump yes, but on the way down its negative in air: FIXED!
         /*really you want to update the previous collision point y if you're falling or jumping. If you're falling and you don't update
           prev collision point y, you will satisfy the conditions of the collision detection if you fall off a platform but move your x
           pos inside of it.
          */
-
+        this.checkIfCanJump();
         //prevCollisionPointY has to go here first
-        if(this.yVel > 0){
-            matt.prevCollisionPointY = matt.collisionPointY;
-            //prevCollisionPointY is really y pos + whatever the jump height is set to
-
-        }
-
-        if(this.yVel < 0){
-            matt.prevCollisionPointY = matt.collisionPointY;
-        }
-
-
-
-        if(this.yVel == 0){
-            this.isJumping = false;
-        }
+        this.updatePreviousYColPoint();
 
         //Because the y collision point isn't factored into resize sprite, if you resize the browser the collisionPointY
         //will go beyond the ground or whatever plat you're on.
         this.resizeSprite();
         this.updateXPos();
-        this.UpdateYPos();
+        this.updateYPos();
         this.updateCollisionPoints();
-        this.checkIfStopped();
+        this.checkIfStoppedX();
         //7 total walking frames, total number of frames is 20 for 0 - 20. Every 3 updates is represented by a frame in this case
         this.drawFrame(20);
     }
@@ -79,11 +63,24 @@ class Player extends GameObject{
     }
 
     //Function to update the Y position of the player based on the yVel. vVel gets updated by game logic via controller inputs
-    UpdateYPos(){
+    updateYPos(){
         this.y -= this.yVel;
         this.yVel *= 0.9;
         //gravity
         this.yVel -= 3;
+    }
+
+    //Function that updates the previous Y Col Point if you are jumping or falling. Used in collision detection to see if the character
+    //is coming from a higher place to land on the top of a platform
+    updatePreviousYColPoint(){
+        if(this.yVel > 0){
+            matt.prevCollisionPointY = matt.collisionPointY;
+            //prevCollisionPointY is really y pos + whatever the jump height is set to
+
+        }
+        if(this.yVel < 0){
+            matt.prevCollisionPointY = matt.collisionPointY;
+        }
     }
 
     //Function to set collision point at the very bottom and middle of the player object
@@ -92,17 +89,24 @@ class Player extends GameObject{
         this.collisionPointY = this.y + this.h;
     }
 
-    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0.
-    checkIfStopped(){
+    //Function to check to see if character's xVelocity and yVelocity has been multiplied by 0.9 enough so that its basically 0
+    checkIfStoppedX(){
         if(this.xVel > 0 && this.xVel < 1){
             this.xVel = 0;
         }
         if(this.xVel < 0 && this.xVel > -1){
             this.xVel = 0;
         }
-
     }
 
+    //Function to check if the characters's yVel is 0 to restore its jump
+    checkIfCanJump(){
+        if(this.yVel == 0){
+            this.isJumping = false;
+        }
+    }
+
+    //Function that handles drawing the next frame of animation in the character's walk cycle from the left and right image arrays
     drawFrame(numWalkingFrames){
         if(this.currentFrame > numWalkingFrames){
             this.currentFrame = 1;
@@ -132,6 +136,7 @@ class Player extends GameObject{
         }
     }
 
+    //Function that increases character's yVel if they have a jump
     jump(height){
         if(!this.isJumping){
             this.yVelocity += height;
@@ -139,11 +144,10 @@ class Player extends GameObject{
         }
     }
 
-    //function to check collisions with platforms
+    //Function to check collisions with platforms via box method
     checkCollision(platform){
 
         if (this.collisionPointX >= platform.left && this.collisionPointX <= platform.right) {
-            //console.log("Passed collision check 1");
             /*
             console.log("This is the previous y: " + this.prevCollisionPointY);
             console.log("This is the current y: " + this.collisionPointY);
@@ -153,18 +157,10 @@ class Player extends GameObject{
             console.log("this is the left of the plat: " + platform.left);
             console.log("This is the right of the plat: " + platform.right);*/
 
-            //possibly need two checks here? if the previous collisionPointY was greater than the platform top too
-            //problem here is as soon as I hit the jump key I'm above the ground and below platform1 so I'll teleport up
-            //if the old position is above the collidable plat and the new one dips below
             if(this.prevCollisionPointY <= platform.top) {
                 if (this.collisionPointY >= platform.top) {
-                    //console.log("collision detected");
                     this.y = platform.top - this.h;
                     this.yVel = 0;
-
-                    //little bug, because the collisionPointY is reset here when a collision on a plat occurs, you can left
-                    //right at the edge of a platform and teleport up
-
                 }
             }
         }
