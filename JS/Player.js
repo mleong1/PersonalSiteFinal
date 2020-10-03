@@ -41,6 +41,7 @@ class Player extends GameObject{
           prev collision point y, you will satisfy the conditions of the collision detection if you fall off a platform but move your x
           pos inside of it.
          */
+
         this.checkIfCanJump();
         //prevCollisionPointY has to go here first
         this.updatePreviousYColPoint();
@@ -55,6 +56,7 @@ class Player extends GameObject{
         //7 total walking frames, total number of frames is 20 for 0 - 20. Every 3 updates is represented by a frame in this case
         this.drawFrame(20);
     }
+
 
     //Function to update the X position of the player based on the xVel. xVel gets updated by game logic via controller inputs
     updateXPos(){
@@ -157,10 +159,14 @@ class Player extends GameObject{
             console.log("this is the left of the plat: " + platform.left);
             console.log("This is the right of the plat: " + platform.right);*/
 
+            //Todo resize bug: top condition will fall through if I resize the browser on a platform because the prev doesn't change while
+            //not moving but the platform top will be resizing
             if(this.prevCollisionPointY <= platform.top) {
                 if (this.collisionPointY >= platform.top) {
+                    //at this point you're on top of the plat
                     this.y = platform.top - this.h;
                     this.yVel = 0;
+                    
                 }
             }
         }

@@ -122,8 +122,7 @@ function logInformation(){
 //*****Classes*****//
 
 
-class TextPlatform extends Platform{
-}
+
 
 
 /*
@@ -139,7 +138,7 @@ class Controller{
         //todo need to get these constructor variables to work somehow
         this.rightPressed = false;
         this.leftPressed = false;
-        this.upPressed = false;
+        this.upPressed = false
     }
 
     //I had three instance variables here, one for each input set to false, didn't work
@@ -148,7 +147,6 @@ class Controller{
             //move right
             rightPressed = true;
             console.log("right key is pressed!");
-            console.log(this.rightPressed);
         }
         if (e.key == 'a'){
             //move left
@@ -161,17 +159,17 @@ class Controller{
     }
 
     keyUpHandler(e){
-        if (e.keyCode == 68) {
+        if (e.key == 'd') {
             //move right
             console.log("right key is not pressed.");
             rightPressed = false;
             console.log(this.rightPressed);
         }
-        if(e.keyCode == 65){
+        if(e.key == 'a'){
             //move left
             leftPressed = false;
         }
-        if(e.keyCode == 87){
+        if(e.key == 'w'){
             //jump
             upPressed = false;
         }
@@ -197,13 +195,16 @@ var controller = new Controller();
 document.addEventListener('keydown', controller.keyDownHandler);
 document.addEventListener('keyup', controller.keyUpHandler);
 
+
 var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + (outOfBounds * 2), 2);
 var matt = new Player(canvas.width - canvas.width * .95, ground - 40,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
-var platform2 = new Platform(canvas.width/2 - 200, canvas.height - 200, canvas.width * 0.22, 20);
-var platform1 = new Platform(0, canvas.height - 500, canvas.width/2 + 200, 20);
-var platArray = [platform1, platform2, theFloor];
+var textPlatTest2 = new TextPlatform(0, Math.round(canvas.height * 0.50), canvas.width/2, 40, "Jump on this too");
+var textPlatTest1 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.80), canvas.width * 0.22,
+    40, "Jump on this");
+var platArray = [textPlatTest2, theFloor, textPlatTest1];
 
+//document.addEventListener('resize', matt.resizePrevColPoint);
 
 function animate(){
     requestAnimationFrame(animate);
@@ -229,6 +230,7 @@ function animate(){
     }
 
     matt.update();
+
     //this is probably not where this loop should go, probably in the board class down the line
     //controls scrolling so you don't go out of bounds of the canvas
     if(matt.x < -matt.w){
@@ -241,6 +243,7 @@ function animate(){
     platArray.forEach(function (plat) {
         matt.checkCollision(plat);
     })
+
 
     updateOldCanvas();
     //logInformation();
