@@ -166,7 +166,6 @@ class Player extends GameObject{
                     //at this point you're on top of the plat
                     this.y = platform.top - this.h;
                     this.yVel = 0;
-                    
                 }
             }
         }

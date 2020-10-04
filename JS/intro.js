@@ -2,7 +2,6 @@
 var canvas = document.getElementById("intro");
 //ctx allows for the drawing of 2d elements on the canvas
 var ctx = canvas.getContext("2d");
-let ground = canvas.height - canvas.height * .30;
 fitToParentContainer(canvas);
 let oldWidth = canvas.width;
 let oldHeight = canvas.height;
@@ -83,7 +82,6 @@ function fitToParentContainer(canvas) {
     canvas.style.height = '100%';
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    ground = canvas.height - canvas.height * .30;
 }
 
 function updateOldCanvas(){
@@ -105,7 +103,6 @@ function draw() {
 
 function logInformation(){
     console.log("This is the canvas height: " + canvas.height);
-    //console.log("This is the ground: " + ground);
     //console.log("This is player's x: " + matt.x);
     //console.log("This is player's y: " + matt.y);
     console.log("This is the player's feet: " + matt.collisionPointY);
@@ -197,12 +194,14 @@ document.addEventListener('keyup', controller.keyUpHandler);
 
 
 var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + (outOfBounds * 2), 2);
-var matt = new Player(canvas.width - canvas.width * .95, ground - 40,
+var matt = new Player(canvas.width - canvas.width * .95, canvas.height * 0.70,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 var textPlatTest2 = new TextPlatform(0, Math.round(canvas.height * 0.50), canvas.width/2, 40, "Jump on this too");
 var textPlatTest1 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.80), canvas.width * 0.22,
     40, "Jump on this");
-var platArray = [textPlatTest2, theFloor, textPlatTest1];
+var textPlatTest3 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.20), canvas.width * 0.22,
+    40, "Matthew Leong");
+var platArray = [textPlatTest2, theFloor, textPlatTest1, textPlatTest3];
 
 //document.addEventListener('resize', matt.resizePrevColPoint);
 
@@ -211,9 +210,21 @@ function animate(){
     //fit to parent container needs to be here to resize the canvas whenever the screen is resized
     fitToParentContainer(canvas);
 
+
+
     platArray.forEach(function(plat){
         plat.update();
     })
+
+    if(matt.xVel == 0 && matt.yVel == 0){
+        matt.prevCollisionPointY = matt.collisionPointY - 10;
+    }
+
+
+    /*
+    console.log("This is the floors top after the plat update: " + textPlatTest1.top);
+    console.log("This is the players previous y Col point after the plat update: " + matt.prevCollisionPointY);
+    */
 
     //console.log("Inside the game loop: " + controller.rightPressed + " " + matt.xVel + " ");
     //if checks can't be conditional here otherwise you won't be able to run and jump
@@ -231,6 +242,10 @@ function animate(){
 
     matt.update();
 
+    /*
+    console.log("This is the floors top after the matt update: " + textPlatTest1.top);
+    console.log("This is the players previous y Col point after the matt update: " + matt.prevCollisionPointY);
+     */
     //this is probably not where this loop should go, probably in the board class down the line
     //controls scrolling so you don't go out of bounds of the canvas
     if(matt.x < -matt.w){
@@ -243,6 +258,8 @@ function animate(){
     platArray.forEach(function (plat) {
         matt.checkCollision(plat);
     })
+
+
 
 
     updateOldCanvas();
