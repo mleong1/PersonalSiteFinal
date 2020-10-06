@@ -58,6 +58,23 @@ class Player extends GameObject{
     }
 
 
+    //Function to check if the characters's yVel is 0 to restore its jump
+    checkIfCanJump(){
+        if(this.yVel == 0){
+            this.isJumping = false;
+        }
+    }
+
+    //Function that updates the previous Y Col Point if you are jumping or falling. Used in collision detection to see if the character
+    //is coming from a higher place to land on the top of a platform
+    updatePreviousYColPoint(){
+        if(this.yVel != 0){
+            matt.prevCollisionPointY = matt.collisionPointY;
+            //prevCollisionPointY is really y pos + whatever the jump height is set to
+
+        }
+    }
+
     //Function to update the X position of the player based on the xVel. xVel gets updated by game logic via controller inputs
     updateXPos(){
         this.x += this.xVel;
@@ -70,19 +87,6 @@ class Player extends GameObject{
         this.yVel *= 0.9;
         //gravity
         this.yVel -= 3;
-    }
-
-    //Function that updates the previous Y Col Point if you are jumping or falling. Used in collision detection to see if the character
-    //is coming from a higher place to land on the top of a platform
-    updatePreviousYColPoint(){
-        if(this.yVel > 0){
-            matt.prevCollisionPointY = matt.collisionPointY;
-            //prevCollisionPointY is really y pos + whatever the jump height is set to
-
-        }
-        if(this.yVel < 0){
-            matt.prevCollisionPointY = matt.collisionPointY;
-        }
     }
 
     //Function to set collision point at the very bottom and middle of the player object
@@ -98,13 +102,6 @@ class Player extends GameObject{
         }
         if(this.xVel < 0 && this.xVel > -1){
             this.xVel = 0;
-        }
-    }
-
-    //Function to check if the characters's yVel is 0 to restore its jump
-    checkIfCanJump(){
-        if(this.yVel == 0){
-            this.isJumping = false;
         }
     }
 

@@ -44,7 +44,7 @@ class GameObject{
         //proportionate x and y positions based on canvas resizing
         this.x = this.x * canvas.width/oldWidth;
         this.y = this.y * canvas.height/oldHeight;
-        this.h = canvas.height *.3;
-        this.w = canvas.width * .18;
+        this.h = this.h * canvas.height/oldHeight;
+        this.w = this.w * canvas.width/oldWidth;
     }
 }

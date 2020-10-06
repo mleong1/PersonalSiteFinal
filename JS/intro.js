@@ -94,13 +94,6 @@ function updateOldCanvas(){
     }
 }
 
-function draw() {
-    //text of my name
-    ctx.font = "50px Roboto";
-    ctx.textAlign = "center";
-    ctx.fillText("Matthew Y Leong", canvas.width / 2, canvas.height / 2);
-}
-
 function logInformation(){
     console.log("This is the canvas height: " + canvas.height);
     //console.log("This is player's x: " + matt.x);
@@ -126,9 +119,9 @@ function logInformation(){
 Controller inputs, need to think of a better way to handle these
  */
 
-var rightPressed;
-var leftPressed;
-var upPressed;
+var rightPressed = false
+var leftPressed = false;
+var upPressed = false;
 
 class Controller{
     constructor(){
@@ -194,7 +187,7 @@ document.addEventListener('keyup', controller.keyUpHandler);
 
 
 var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + (outOfBounds * 2), 2);
-var matt = new Player(canvas.width - canvas.width * .95, canvas.height * 0.70,
+var matt = new Player(canvas.width - canvas.width * .95, canvas.height * 0.65,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
 var textPlatTest2 = new TextPlatform(0, Math.round(canvas.height * 0.50), canvas.width/2, 40, "Jump on this too");
 var textPlatTest1 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.80), canvas.width * 0.22,
@@ -210,15 +203,11 @@ function animate(){
     //fit to parent container needs to be here to resize the canvas whenever the screen is resized
     fitToParentContainer(canvas);
 
-
-
     platArray.forEach(function(plat){
         plat.update();
     })
 
-    if(matt.xVel == 0 && matt.yVel == 0){
-        matt.prevCollisionPointY = matt.collisionPointY - 10;
-    }
+
 
 
     /*
@@ -242,6 +231,15 @@ function animate(){
 
     matt.update();
 
+    //this is the right spot for this for sure, no clue why it has to be - 40 as opposed to 3 or 10
+    if(leftPressed == false && rightPressed == false && upPressed == false){
+        console.log("Im here");
+        //buffer of 3
+        matt.prevCollisionPointY = matt.collisionPointY - 40;
+    } else {
+        console.log("First few frames");
+    }
+
     /*
     console.log("This is the floors top after the matt update: " + textPlatTest1.top);
     console.log("This is the players previous y Col point after the matt update: " + matt.prevCollisionPointY);
@@ -254,7 +252,9 @@ function animate(){
         matt.x = -matt.w;
     }
 
-    //matt.checkCollision(theFloor);
+
+
+
     platArray.forEach(function (plat) {
         matt.checkCollision(plat);
     })
