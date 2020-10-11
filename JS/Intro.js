@@ -9,10 +9,10 @@ let oldHeight = canvas.height;
   right more space.*/
 let outOfBounds = canvas.width/2;
 
+var gameworld = new GameWorld(canvas, ctx, oldWidth, oldHeight);
+
 //todo develop a ratio so that pixel art isn't scrunched
 //todo look into import statements instead of loading each separate JS file
-
-
 
 <!--Loading sprites-->
 var idleImg = new Image();
@@ -123,63 +123,6 @@ var rightPressed = false
 var leftPressed = false;
 var upPressed = false;
 
-class Controller{
-    constructor(){
-        //todo need to get these constructor variables to work somehow
-        this.rightPressed = false;
-        this.leftPressed = false;
-        this.upPressed = false
-    }
-
-    //I had three instance variables here, one for each input set to false, didn't work
-    keyDownHandler(e){
-        if (e.key == 'd') {
-            //move right
-            rightPressed = true;
-            console.log("right key is pressed!");
-        }
-        if (e.key == 'a'){
-            //move left
-            leftPressed = true;
-        }
-        if(e.key == "w"){
-            //jump
-            upPressed = true;
-        }
-    }
-
-    keyUpHandler(e){
-        if (e.key == 'd') {
-            //move right
-            console.log("right key is not pressed.");
-            rightPressed = false;
-            console.log(this.rightPressed);
-        }
-        if(e.key == 'a'){
-            //move left
-            leftPressed = false;
-        }
-        if(e.key == 'w'){
-            //jump
-            upPressed = false;
-        }
-    }
-}
-
-
-/*class Game{
-    constructor(player, controller){
-        this.player = player;
-        this.controller = controller;
-    }
-
-    update(){
-        console.log("Got here at least");
-        if(controller.rightPressed){
-            console.log("We have an input");
-        }
-    }
-}*/
 
 var controller = new Controller();
 document.addEventListener('keydown', controller.keyDownHandler);
@@ -189,9 +132,9 @@ document.addEventListener('keyup', controller.keyUpHandler);
 var theFloor = new Platform(0 - outOfBounds, canvas.height - 2, canvas.width + (outOfBounds * 2), 2);
 var matt = new Player(canvas.width - canvas.width * .95, canvas.height * 0.65,
     canvas.width * .18, canvas.height *.3, picArray, picLeftArray);
-var textPlatTest2 = new TextPlatform(0, Math.round(canvas.height * 0.50), canvas.width/2, 40, "Jump on this too");
+var textPlatTest2 = new TextPlatform(0, Math.round(canvas.height * 0.50), canvas.width/2, 40, "With an interest in front end design");
 var textPlatTest1 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.80), canvas.width * 0.22,
-    40, "Jump on this");
+    40, "A programmer");
 var textPlatTest3 = new TextPlatform(canvas.width/2 - canvas.width * 0.11, Math.round(canvas.height * 0.20), canvas.width * 0.22,
     40, "Matthew Leong");
 var platArray = [textPlatTest2, theFloor, textPlatTest1, textPlatTest3];
@@ -201,14 +144,12 @@ var platArray = [textPlatTest2, theFloor, textPlatTest1, textPlatTest3];
 function animate(){
     requestAnimationFrame(animate);
     //fit to parent container needs to be here to resize the canvas whenever the screen is resized
-    fitToParentContainer(canvas);
+    //fit to parent also seems to control redrawing the canvas
+    gameworld.fitToParentContainer();
 
     platArray.forEach(function(plat){
-        plat.update();
+        plat.update(gameworld);
     })
-
-
-
 
     /*
     console.log("This is the floors top after the plat update: " + textPlatTest1.top);
@@ -229,7 +170,7 @@ function animate(){
         matt.jump(canvas.height * 0.1);
     }
 
-    matt.update();
+    matt.update(gameworld);
 
     //this is the right spot for this for sure, no clue why it has to be - 40 as opposed to 3 or 10
     if(leftPressed == false && rightPressed == false && upPressed == false){
@@ -262,25 +203,8 @@ function animate(){
 
 
 
-    updateOldCanvas();
+    gameworld.updateOldCanvas();
     //logInformation();
 }
 
 animate();
-
-
-
-//Need to move this controller out into its own class
-//You can only go one direction at a time it seems
-/*document.querySelector('body').onkeydown = function (e) {
-    //right direction
-    if (e.keyCode == 68) {
-        //xMove += 15;
-        matt.xVelocity += 10;
-    } else if(e.keyCode == 65){
-        //xMove -= 15;
-        matt.xVelocity -= 10;
-    } else if(e.keyCode == 87){
-        matt.yVelocity += canvas.height * 0.1;
-    }
-}*/

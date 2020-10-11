@@ -40,11 +40,11 @@ class GameObject{
 
     //Function to resize sprite to canvas browser since the canvas resizes based on parent
     //Resize sprite constantly controls sprites size
-    resizeSprite(){
+    resizeSprite(currWidth, oldWidth, currHeight, oldHeight){
         //proportionate x and y positions based on canvas resizing
-        this.x = this.x * canvas.width/oldWidth;
-        this.y = this.y * canvas.height/oldHeight;
-        this.h = this.h * canvas.height/oldHeight;
-        this.w = this.w * canvas.width/oldWidth;
+        this.x = this.x * currWidth/oldWidth;
+        this.y = this.y * currHeight/oldHeight;
+        this.h = this.h * currHeight/oldHeight;
+        this.w = this.w * currWidth/oldWidth;
     }
 }

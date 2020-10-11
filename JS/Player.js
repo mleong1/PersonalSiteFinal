@@ -31,7 +31,7 @@ class Player extends GameObject{
     }
 
 
-    update(){
+    update(gameWorld){
         //Order of these operations really matters
         //Collision point x and y both depend on x and y after they are affected by velocity, they need to be updated
         //after x and y have been updated
@@ -48,13 +48,13 @@ class Player extends GameObject{
 
         //Because the y collision point isn't factored into resize sprite, if you resize the browser the collisionPointY
         //will go beyond the ground or whatever plat you're on.
-        this.resizeSprite();
+        this.resizeSprite(gameWorld.currWidth, gameWorld.oldWidth, gameWorld.currHeight, gameWorld.oldHeight);
         this.updateXPos();
         this.updateYPos();
         this.updateCollisionPoints();
         this.checkIfStoppedX();
         //7 total walking frames, total number of frames is 20 for 0 - 20. Every 3 updates is represented by a frame in this case
-        this.drawFrame(20);
+        this.drawFrame(20, gameWorld.context);
     }
 
 
@@ -69,9 +69,8 @@ class Player extends GameObject{
     //is coming from a higher place to land on the top of a platform
     updatePreviousYColPoint(){
         if(this.yVel != 0){
-            matt.prevCollisionPointY = matt.collisionPointY;
+            this.prevCollisionPointY = this.collisionPointY;
             //prevCollisionPointY is really y pos + whatever the jump height is set to
-
         }
     }
 
@@ -105,8 +104,9 @@ class Player extends GameObject{
         }
     }
 
-    //Function that handles drawing the next frame of animation in the character's walk cycle from the left and right image arrays
-    drawFrame(numWalkingFrames){
+    //Function that handles drawing the next frame of animation in the character's walk cycle from the left and right image arrays.
+    //Requires the number of walking frames (more cycles through animation frames slower) and the context to draw in.
+    drawFrame(numWalkingFrames, ctx){
         if(this.currentFrame > numWalkingFrames){
             this.currentFrame = 1;
         }

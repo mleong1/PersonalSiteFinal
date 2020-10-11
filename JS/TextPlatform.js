@@ -11,12 +11,12 @@ class TextPlatform extends Platform{
         return this.y - this.h;
     }
 
-    update() {
-        this.resizeSprite();
-        ctx.font = this.h + 'px Arial';
-        ctx.imageSmoothingEnabled = false;
-        this.w = ctx.measureText(this.text).width;
+    update(gameWorld) {
+        this.resizeSprite(gameWorld.currWidth, gameWorld.oldWidth, gameWorld.currHeight, gameWorld.oldHeight);
+        gameWorld.context.font = this.h + 'px Arial';
+        gameWorld.context.imageSmoothingEnabled = false;
+        this.w = gameWorld.context.measureText(this.text).width;
         //ctx.fillText("A really cool guy.", this.x + canvas.width * 0.11, this.y + this.h * 1.75, this.w);
-        ctx.fillText(this.text, this.x, this.y);
+        gameWorld.context.fillText(this.text, this.x, this.y);
     }
 }
