@@ -4,10 +4,3 @@ var canvas2 = document.getElementById("bio");
 var ctx2 = canvas2.getContext("2d");
 fitToParentContainer(canvas2);
 
-
-function fitToParentContainer(canvas) {
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-}

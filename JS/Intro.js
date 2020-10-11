@@ -118,6 +118,23 @@ function keyUpHandler(e){
     }
 }
 
+//https://stackoverflow.com/questions/49228608/start-css-animation-after-scrolling-to-particular-section-of-page
+//If we use this on scroll listener we can dynamically change which canvas is in use currently by just switching the
+//canvas and context to point to the canvas in the next div. GameWorld is updating the scrollpos currently, not the right place.
+var scrollpos = window.scrollY; // window scroll position
+var wh = window.innerHeight; // as soon as element touches bottom with offset event starts
+var canvas2 = document.getElementById("bio");
+//ctx allows for the drawing of 2d elements on the canvas
+var ctx2 = canvas2.getContext("2d");
+window.addEventListener('scroll', function(){
+    if(scrollpos > wh){
+        console.log("ALERT ALERT ALERT!")
+        gameworld.canvas = canvas2;
+        gameworld.context = ctx2;
+        game.gameWorld = gameworld;
+    }
+});
+
 //There should be a start game function to put everything in their starting places
 //There should be a reset to be called when the canvas isn't in view
 //Classes player, platforms (extend platforms so that they can have textures and not just words), items, gameObj, and controller

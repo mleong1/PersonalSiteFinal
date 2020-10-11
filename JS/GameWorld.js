@@ -21,11 +21,16 @@ class GameWorld{
         return this.ctx;
     }
 
+    set context(ctx){
+        this.ctx = ctx;
+    }
+
     fitToParentContainer() {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         this.canvas.width = canvas.offsetWidth;
         this.canvas.height = canvas.offsetHeight;
+        scrollpos = window.scrollY;
     }
 
     updateOldCanvas(){
