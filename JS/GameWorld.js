@@ -7,6 +7,9 @@ class GameWorld{
         /*outOfBounds here is just a little buffer that I end up adding to the floor to give 100 pixels to the left and 100 to the
         right more space.*/
         this.outOfBounds = 1000;
+        this.scrollPos = window.scrollY;
+        this.endOfIntro = window.innerHeight;
+        this.endOfBio = window.innerHeight * 2;
     }
 
     get currHeight(){
